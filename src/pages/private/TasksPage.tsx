@@ -77,7 +77,6 @@ export const TasksPage = () => {
     const rawData = {
       name: formdata.get("name") as string,
     };
-
     try {
       schemaTask.parse(rawData);
       if (task?.id) {

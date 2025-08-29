@@ -4,16 +4,19 @@ import {
   Button,
   CircularProgress,
   Container,
+  IconButton,
+  InputAdornment,
   Paper,
   TextField,
   Typography,
-} from '@mui/material';
-import { useActionState } from 'react';
-import { shemaLogin, type LoginFormValues } from '../../models';
-import type { ActionState } from '../../interfaces';
-import { createInitialState, hanleZodError } from '../../helpers';
-import { useAlert, useAuth, useAxios } from '../../hooks';
-import { Link, useNavigate } from 'react-router-dom';
+} from "@mui/material";
+import { useActionState, useState } from "react";
+import { shemaLogin, type LoginFormValues } from "../../models";
+import type { ActionState } from "../../interfaces";
+import { createInitialState, hanleZodError } from "../../helpers";
+import { useAlert, useAuth, useAxios } from "../../hooks";
+import { Link, useNavigate } from "react-router-dom";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export type LoginActionState = ActionState<LoginFormValues>;
 const initialState = createInitialState<LoginFormValues>();
@@ -30,20 +33,19 @@ export const LoginPage = () => {
     formData: FormData
   ) => {
     const rawData: LoginFormValues = {
-      username: formData.get('username') as string,
-      password: formData.get('password') as string,
+      username: formData.get("username") as string,
+      password: formData.get("password") as string,
     };
     try {
       shemaLogin.parse(rawData);
       //await delay(3000);
-      const response = await axios.post('/login', rawData);
-      if (!response?.data?.token) throw new Error('No existe el token');
+      const response = await axios.post("/login", rawData);
+      if (!response?.data?.token) throw new Error("No existe el token");
       login(response.data.token, { username: rawData.username });
-      navigate('/perfil');
+      navigate("/perfil");
     } catch (error) {
       const err = hanleZodError<LoginFormValues>(error, rawData);
-      console.log('err', err);
-      showAlert(err.message, 'error');
+      showAlert(err.message, "error");
       return err;
     }
   };
@@ -53,28 +55,36 @@ export const LoginPage = () => {
     initialState
   );
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: any) => {
+    event.preventDefault();
+  };
+
   return (
     <Container
       maxWidth={false}
       sx={{
-        backgroundColor: '#242424',
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
+        backgroundColor: "#242424",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
       <Box
         sx={{
-          maxWidth: 'sm',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          textAlign: 'center',
-          height: '100vh',
+          maxWidth: "sm",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          textAlign: "center",
+          height: "100vh",
         }}
       >
         <Paper elevation={3} sx={{ padding: 4 }}>
-          <Typography component={'h1'} variant="h4" gutterBottom>
+          <Typography component={"h1"} variant="h4" gutterBottom>
             LOGIN
           </Typography>
 
@@ -87,7 +97,7 @@ export const LoginPage = () => {
             <Alert severity="error">{state?.message}</Alert>
           )}
 
-          <Box action={submitAction} component={'form'} sx={{ width: '100%' }}>
+          <Box action={submitAction} component={"form"} sx={{ width: "100%" }}>
             <TextField
               name="username"
               margin="normal"
@@ -108,11 +118,25 @@ export const LoginPage = () => {
               required
               fullWidth
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               disabled={isPending}
               defaultValue={state?.formData?.password}
               error={!!state?.errors?.password}
               helperText={state?.errors?.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"
@@ -126,9 +150,9 @@ export const LoginPage = () => {
                 ) : null
               }
             >
-              {isPending ? 'Cargando...' : 'Ingresar'}
+              {isPending ? "Cargando..." : "Ingresar"}
             </Button>
-            <Link to='/userRegister'>Registrar nuevo usuario</Link>
+            <Link to="/userRegister">Registrar nuevo usuario</Link>
           </Box>
         </Paper>
       </Box>

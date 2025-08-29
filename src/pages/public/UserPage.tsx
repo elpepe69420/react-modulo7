@@ -3,16 +3,19 @@ import {
   Button,
   CircularProgress,
   Container,
+  IconButton,
+  InputAdornment,
   Paper,
   TextField,
   Typography,
-} from '@mui/material';
-import type { ActionState } from '../../interfaces';
-import { schemaUser, type UserFormValues } from '../../models';
-import { createInitialState, hanleZodError } from '../../helpers';
-import { useAlert, useAxios } from '../../hooks';
-import { Link, useNavigate } from 'react-router-dom';
-import { useActionState } from 'react';
+} from "@mui/material";
+import type { ActionState } from "../../interfaces";
+import { schemaUser, type UserFormValues } from "../../models";
+import { createInitialState, hanleZodError } from "../../helpers";
+import { useAlert, useAxios } from "../../hooks";
+import { Link, useNavigate } from "react-router-dom";
+import { useActionState, useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 type UserActionState = ActionState<UserFormValues>;
 const initialState = createInitialState<UserFormValues>();
@@ -26,21 +29,21 @@ export const UserPage = () => {
     formData: FormData
   ) => {
     const rawData: UserFormValues = {
-      username: formData.get('username') as string,
-      password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
+      username: formData.get("username") as string,
+      password: formData.get("password") as string,
+      confirmPassword: formData.get("confirmPassword") as string,
     };
     try {
       schemaUser.parse(rawData);
-      await axios.post('/users', {
+      await axios.post("/users", {
         username: rawData.username,
         password: rawData.password,
       });
-      showAlert('Usuario creado', 'success');
-      navigate('/login');
+      showAlert("Usuario creado", "success");
+      navigate("/login");
     } catch (error) {
       const err = hanleZodError<UserFormValues>(error, rawData);
-      showAlert(err.message, 'error');
+      showAlert(err.message, "error");
       return err;
     }
   };
@@ -50,28 +53,44 @@ export const UserPage = () => {
     initialState
   );
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event: any) => {
+    event.preventDefault();
+  };
+
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword((show) => !show);
+
+  const handleMouseDownConfirmPassword = (event: any) => {
+    event.preventDefault();
+  };
+
   return (
     <Container
       maxWidth={false}
       sx={{
-        backgroundColor: '#242424',
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
+        backgroundColor: "#242424",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
       <Box
         sx={{
-          maxWidth: 'sm',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          textAlign: 'center',
-          height: '100vh',
+          maxWidth: "sm",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          textAlign: "center",
+          height: "100vh",
         }}
       >
         <Paper elevation={3} sx={{ padding: 4 }}>
-          <Typography component={'h1'} variant="h4" gutterBottom>
+          <Typography component={"h1"} variant="h4" gutterBottom>
             Nuevo Usuario
           </Typography>
 
@@ -79,7 +98,7 @@ export const UserPage = () => {
           <Alert severity="error">{state?.message}</Alert>
         )} */}
 
-          <Box action={submitAction} component={'form'} sx={{ width: '100%' }}>
+          <Box action={submitAction} component={"form"} sx={{ width: "100%" }}>
             <TextField
               name="username"
               margin="normal"
@@ -100,11 +119,25 @@ export const UserPage = () => {
               required
               fullWidth
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               disabled={isPending}
               defaultValue={state?.formData?.password}
               error={!!state?.errors?.password}
               helperText={state?.errors?.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <TextField
               name="confirmPassword"
@@ -112,11 +145,25 @@ export const UserPage = () => {
               required
               fullWidth
               label="Repetir password"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               disabled={isPending}
               defaultValue={state?.formData?.confirmPassword}
               error={!!state?.errors?.confirmPassword}
               helperText={state?.errors?.confirmPassword}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowConfirmPassword}
+                      onMouseDown={handleMouseDownConfirmPassword}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"
@@ -130,7 +177,7 @@ export const UserPage = () => {
                 ) : null
               }
             >
-              {isPending ? 'Cargando...' : 'Registrar'}
+              {isPending ? "Cargando..." : "Registrar"}
             </Button>
             <Link to="/login">Ir a login</Link>
           </Box>

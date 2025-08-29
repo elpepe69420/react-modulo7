@@ -6,7 +6,14 @@ import {
   type GridSortModel,
 } from "@mui/x-data-grid";
 import type { UsersAdminType } from "./type";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+  Edit as EditIcon,
+  Undo as UndoIcon,
+  Done as DoneIcon,
+  Delete as DeleteIcon,
+  QuestionMark as QuestionMarkIcon,
+} from "@mui/icons-material";
 
 interface Props {
   users: UsersAdminType[];
@@ -27,10 +34,10 @@ export const UsersAdminTabla = ({
   setPaginationModel,
   setSortModel,
   sortModel,
-}: // handleDelete,
-// handleStatus,
-// handleOpenEditDialog
-Props) => {
+  handleDelete,
+  handleStatus,
+  handleOpenEditDialog,
+}: Props) => {
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 90 },
     { field: "username", headerName: "Username", flex: 1 },
@@ -57,6 +64,65 @@ Props) => {
           size="small"
           variant="outlined"
         />
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Acciones",
+      sortable: false,
+      filterable: false,
+      width: 200,
+      renderCell: (params: GridRenderCellParams) => (
+        <Stack direction={"row"} spacing={1}>
+          <Tooltip title="Editar">
+            <IconButton
+              size="small"
+              onClick={() => handleOpenEditDialog(params.row)}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip
+            title={
+              params.row.status === "active"
+                ? "Inhabilitar"
+                : params.row.status === "inactive"
+                ? "Habilitar"
+                : "Fuera de rango"
+            }
+          >
+            <IconButton
+              size="small"
+              color={
+                params.row.status === "inactive"
+                  ? "warning"
+                  : params.row.status === "active"
+                  ? "success"
+                  : "error"
+              }
+              onClick={() => handleStatus(params.row.id, params.row.status)}
+            >
+              {params.row.status === "inactive" ? (
+                <UndoIcon fontSize="small" />
+              ) : params.row.status === "active" ? (
+                <DoneIcon fontSize="small" />
+              ) : (
+                <QuestionMarkIcon />
+              )}
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Eliminar">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => handleDelete(params.row.id)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       ),
     },
   ];
