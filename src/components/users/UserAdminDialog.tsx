@@ -13,7 +13,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import type { UsersAdminType, UsersAdminUpdateType } from "./type";
+import type { UsersAdminUpdateType } from "./type";
 import { useActionState, useState } from "react";
 import type { ActionState } from "../../interfaces";
 import type { UserFormValues } from "../../models";
